@@ -52,6 +52,7 @@ class _AuthViewState extends BaseState<AuthView> {
           controller: viewModel.pageController,
           physics: NeverScrollableScrollPhysics(),
           children: [
+            buildLoginView(context, viewModel),
             Padding(
               padding: context.horizontalPadding(value: 4),
               child: Center(
@@ -95,7 +96,6 @@ class _AuthViewState extends BaseState<AuthView> {
                 ),
               ),
             ),
-            buildLoginView(context, viewModel),
           ],
         ),
       ),
