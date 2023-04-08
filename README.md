@@ -1,5 +1,7 @@
 # Coffee Sapiens Shift App
 
+What I did in the project: localization, dark theme, responsive
+
 ##### Splash Screen
 ![Splash](https://github.com/Thixq/coffeesapiens/blob/main/screenshots/Splash.png "Splash")
 
