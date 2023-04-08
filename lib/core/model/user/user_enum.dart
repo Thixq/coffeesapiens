@@ -1,0 +1,3 @@
+enum Eshift { MIDDLEMAN, MORNING, NIGHT }
+
+enum Ebranch { KANYON, KARAKOY, CADDEBOSTAN }
