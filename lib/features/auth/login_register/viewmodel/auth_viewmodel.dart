@@ -8,8 +8,9 @@ class AuthViewModel = _AuthViewModelBase with _$AuthViewModel;
 
 abstract class _AuthViewModelBase extends BaseViewModel<AuthModel> with Store {
   late PageController? pageController;
-  late TextEditingController? textEditingController;
-  late TextEditingController? textEditingController2;
+
+  late GlobalKey<FormState> loginKey;
+  late GlobalKey<FormState> registerKey;
 
   @observable
   bool isVisible = true;
@@ -19,7 +20,7 @@ abstract class _AuthViewModelBase extends BaseViewModel<AuthModel> with Store {
     isVisible = !isVisible;
   }
 
-  void changePage(int a) {
-    pageController?.jumpToPage(a);
+  void changePage(int page) {
+    pageController?.jumpToPage(page);
   }
 }

@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
 extension ContextExtension on BuildContext {
+  //MediaQuery
+  MediaQueryData get mediaQuery => MediaQuery.of(this);
+
   //Padding
   EdgeInsets allPadding({double? value}) => EdgeInsets.all(8.sp * (value ?? 1));
   EdgeInsets horizontalPadding({double? value}) =>
@@ -14,7 +17,7 @@ extension ContextExtension on BuildContext {
   Brightness get themeMode => MediaQuery.of(this).platformBrightness;
   ColorScheme get themeColorScheme => theme.colorScheme;
 
-  //
+  //SizedBox
   SizedBox sizedBox({double? value}) => SizedBox(
         height: 4.sp * (value ?? 1),
       );

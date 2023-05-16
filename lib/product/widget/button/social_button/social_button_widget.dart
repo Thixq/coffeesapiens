@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
-import '../../../core/extension/buildcontext_extension.dart';
+import '../../../../core/extension/buildcontext_extension.dart';
 import 'ISocial_button_class.dart';
 
 class SocialButton extends StatelessWidget {

@@ -43,6 +43,7 @@ dependencies:
   smooth_page_indicator: ^1.0.1
   flutter_svg: ^2.0.4
   extended_masked_text: ^2.3.1
+  text_mask: ^1.0.4
 
 dev_dependencies:
   flutter_test:

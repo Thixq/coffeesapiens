@@ -1,6 +1,6 @@
 import 'package:coffeesapiens_v2/core/extension/string_extension.dart';
 import 'package:coffeesapiens_v2/product/constant/product_constant.dart';
-import 'package:coffeesapiens_v2/product/widget/social_button/ISocial_button_class.dart';
+import 'package:coffeesapiens_v2/product/widget/button/social_button/ISocial_button_class.dart';
 import 'package:flutter/material.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 

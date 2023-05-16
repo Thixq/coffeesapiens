@@ -15,8 +15,8 @@ class ThemeBaseFeaturers {
     titleMedium: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.w500),
     titleSmall: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.w500),
     bodyLarge: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w400),
-    bodyMedium: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w400),
-    bodySmall: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w400),
+    bodyMedium: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w400),
+    bodySmall: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w400),
   );
   InputDecorationTheme inputDecorationTheme(
           {required Color borderColor,
@@ -56,6 +56,9 @@ class ThemeBaseFeaturers {
           width: 2.3,
         ),
       ),
+      focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14.sp),
+          borderSide: BorderSide(color: errorBorder, width: 2.3)),
       fillColor: fillColor,
     );
   }

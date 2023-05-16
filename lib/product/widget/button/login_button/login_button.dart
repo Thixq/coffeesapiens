@@ -1,4 +1,6 @@
-import '../../../core/extension/buildcontext_extension.dart';
+import 'package:coffeesapiens_v2/core/extension/language_extension.dart';
+
+import '../../../../core/extension/buildcontext_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
@@ -13,20 +15,21 @@ class LoginButton extends StatelessWidget {
       onPressed: () {
         onPressed();
       },
-      child: Text(
-        text,
-        style: context.textTheme.bodyMedium,
-      ),
       style: ButtonStyle(
         backgroundColor: MaterialStateColor.resolveWith(
             (states) => context.themeColorScheme.onError),
         minimumSize:
-            MaterialStateProperty.all<Size>(Size(double.infinity, 30.sp)),
+            MaterialStateProperty.all<Size>(Size(double.infinity, 27.sp)),
         overlayColor:
             MaterialStateColor.resolveWith((states) => Colors.transparent),
         elevation: MaterialStateProperty.resolveWith((states) => 0),
         shape: MaterialStateProperty.resolveWith((states) =>
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.sp))),
+      ),
+      child: Text(
+        text.locale,
+        style:
+            context.textTheme.bodyMedium!.copyWith(fontWeight: FontWeight.w600),
       ),
     );
   }

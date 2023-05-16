@@ -1,5 +1,11 @@
-import 'package:coffeesapiens_v2/product/widget/custom_textformfield/custom_textformfiled.dart';
-import 'package:extended_masked_text/extended_masked_text.dart';
+import 'package:coffeesapiens_v2/product/utils/regex/form_validate/form_validate.dart';
+
+import '../../../../product/utils/regex/phone_unmask/phone_unmask.dart';
+import 'package:flutter/services.dart';
+import 'package:text_mask/text_mask.dart';
+
+import '../../../../product/widget/button/registerlogin_button/registerlogin_button.dart';
+import '../../../../product/widget/custom_textformfield/custom_textformfiled.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
@@ -11,9 +17,9 @@ import '../../../../core/extension/buildcontext_extension.dart';
 import '../../../../core/extension/language_extension.dart';
 import '../../../../core/extension/string_extension.dart';
 import '../../../../core/init/language/locale_keys.g.dart';
-import '../../../../product/widget/login_button/login_button.dart';
-import '../../../../product/widget/social_button/social_button_class.dart';
-import '../../../../product/widget/social_button/social_button_widget.dart';
+import '../../../../product/widget/button/login_button/login_button.dart';
+import '../../../../product/widget/button/social_button/social_button_class.dart';
+import '../../../../product/widget/button/social_button/social_button_widget.dart';
 import '../viewmodel/auth_viewmodel.dart';
 
 class AuthView extends StatefulWidget {
@@ -30,16 +36,13 @@ class _AuthViewState extends BaseState<AuthView> {
       viewModel: AuthViewModel(),
       onPageBuilder: (context, viewModel) => buildScaffold(context, viewModel),
       onModelReady: (viewModel) {
-        print("object");
         viewModel.pageController = PageController();
-        viewModel.textEditingController = TextEditingController();
-        viewModel.textEditingController2 =
-            MaskedTextController(mask: "(000)-000-00-00");
+
+        viewModel.loginKey = GlobalKey<FormState>();
+        viewModel.registerKey = GlobalKey<FormState>();
       },
       onDispose: (viewModel) {
         viewModel.pageController?.dispose();
-        viewModel.textEditingController?.dispose();
-        viewModel.textEditingController2?.dispose();
       },
     );
   }
@@ -48,57 +51,159 @@ class _AuthViewState extends BaseState<AuthView> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: SafeArea(
-        child: PageView(
-          controller: viewModel.pageController,
-          physics: NeverScrollableScrollPhysics(),
-          children: [
-            buildLoginView(context, viewModel),
-            Padding(
-              padding: context.horizontalPadding(value: 4),
-              child: Center(
-                child: Column(
-                  children: [
-                    buildChangeLogo(context),
-                    CustomTextFormField(
-                      textTextFormFiled: LocaleKeys.e_mail.locale,
-                      textInputType: TextInputType.emailAddress,
-                      onEditingComplete: () {},
-                    ),
-                    CustomTextFormField(
-                      maskedTextController: viewModel.textEditingController2,
-                      textTextFormFiled: "Telefon",
-                      textInputType: TextInputType.phone,
-                      onEditingComplete: () {},
-                    ),
-                    Observer(builder: (_) {
-                      return CustomTextFormField(
-                        maskedTextController: viewModel.textEditingController,
-                        textTextFormFiled: LocaleKeys.password.locale,
-                        textInputType: TextInputType.visiblePassword,
-                        obscureText: viewModel.isVisible,
-                        decoration: InputDecoration(
-                          suffixIcon: IconButton(
-                            splashColor: Colors.transparent,
-                            hoverColor: Colors.transparent,
-                            highlightColor: Colors.transparent,
-                            onPressed: () {
-                              viewModel.changeVisible();
-                            },
-                            icon: viewModel.isVisible
-                                ? const Icon(Icons.visibility_off)
-                                : const Icon(Icons.visibility),
-                          ),
-                        ),
-                      );
-                    }),
-                    const Spacer(),
-                  ],
-                ),
-              ),
-            ),
-          ],
+        child: GestureDetector(
+          onTap: () {
+            FocusScope.of(context).unfocus();
+          },
+          child: PageView(
+            controller: viewModel.pageController,
+            physics: const NeverScrollableScrollPhysics(),
+            children: [
+              buildLoginView(context, viewModel),
+              buildRegisterScroll(context, viewModel),
+            ],
+          ),
         ),
       ),
+    );
+  }
+
+  SingleChildScrollView buildRegisterScroll(
+      BuildContext context, AuthViewModel viewModel) {
+    return SingleChildScrollView(
+      physics: MediaQuery.of(context).viewInsets.bottom > 0
+          ? const ClampingScrollPhysics()
+          : const NeverScrollableScrollPhysics(),
+      child: Column(
+        children: [
+          SizedBox(
+            height: 100.h -
+                (context.mediaQuery.padding.bottom +
+                    context.mediaQuery.padding.top),
+            child: buildRegisterView(context, viewModel),
+          ),
+          SizedBox(
+            height: MediaQuery.of(context).viewInsets.bottom / 2.5,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget buildRegisterView(BuildContext context, AuthViewModel viewModel) {
+    return Padding(
+      padding: context.horizontalPadding(value: 4),
+      child: Center(
+        child: Form(
+          key: viewModel.registerKey,
+          child: Column(
+            children: [
+              buildChangeLogo(context),
+              buildEmail(viewModel),
+              const Spacer(),
+              buildPhone(context),
+              const Spacer(),
+              buildPassword(viewModel),
+              const Spacer(),
+              LoginButton(
+                text: LocaleKeys.register,
+                onPressed: () {
+                  viewModel.registerKey.currentState!.validate();
+                },
+              ),
+              const Spacer(),
+              buildDivider(context),
+              const Spacer(),
+              buildSocialLoginButton(),
+              const Spacer(
+                flex: 5,
+              ),
+              RegisterLoginWidget(
+                  context: context,
+                  onPressed: () {
+                    viewModel.changePage(0);
+                  },
+                  text1: LocaleKeys.are_you_a_member,
+                  text2: LocaleKeys.sign_in_now),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  CustomTextFormField buildPhone(BuildContext context) {
+    return CustomTextFormField(
+      textTextFormFiled: LocaleKeys.phone.locale,
+      textInputType: TextInputType.number,
+      textInputAction: TextInputAction.next,
+      validator: (p1) {
+        if (p1!.isEmpty) return LocaleKeys.auth_isfilled.locale;
+        if (p1.length < 15) return LocaleKeys.auth_phone_validate.locale;
+      },
+      inputFormatters: [
+        FilteringTextInputFormatter.digitsOnly,
+        TextMask(pallet: "(###) ### ## ##"),
+      ],
+      maxLength: 15,
+      onEditingComplete: () {
+        FocusScope.of(context).nextFocus();
+      },
+      decoration: const InputDecoration(counterText: ''),
+    );
+  }
+
+  Observer buildPassword(AuthViewModel viewModel) {
+    return Observer(builder: (_) {
+      return CustomTextFormField(
+        validator: (p1) {
+          if (p1!.isEmpty) return LocaleKeys.auth_isfilled.locale;
+          if (p1.length < 8)
+            return LocaleKeys.auth_password_powerful_validate.locale;
+        },
+        textTextFormFiled: LocaleKeys.password.locale,
+        textInputType: TextInputType.visiblePassword,
+        textInputAction: TextInputAction.done,
+        obscureText: viewModel.isVisible,
+        decoration: InputDecoration(
+          suffixIcon: buildVisible(viewModel),
+        ),
+      );
+    });
+  }
+
+  CustomTextFormField buildEmail(AuthViewModel viewModel) {
+    return CustomTextFormField(
+      validator: (p1) {
+        if (p1!.isEmpty) return LocaleKeys.auth_isfilled.locale;
+        if (!FormValidate.instance.EmailValidate(p1)) {
+          return LocaleKeys.auth_email_validate.locale;
+        }
+      },
+      textTextFormFiled: LocaleKeys.e_mail.locale,
+      textInputType: TextInputType.emailAddress,
+      textInputAction: TextInputAction.next,
+      onEditingComplete: () {
+        FocusScope.of(context).nextFocus();
+      },
+    );
+  }
+
+  IconButton buildVisible(AuthViewModel viewModel) {
+    return IconButton(
+      style: ButtonStyle(
+        overlayColor:
+            MaterialStateColor.resolveWith((states) => Colors.transparent),
+      ),
+      splashColor: Colors.transparent,
+      hoverColor: Colors.transparent,
+      highlightColor: Colors.transparent,
+      onPressed: () {
+        viewModel.changeVisible();
+      },
+      icon: viewModel.isVisible
+          ? const Icon(Icons.visibility_off)
+          : const Icon(Icons.visibility),
     );
   }
 
@@ -106,54 +211,42 @@ class _AuthViewState extends BaseState<AuthView> {
     return Padding(
       padding: context.horizontalPadding(value: 4),
       child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            buildChangeLogo(context),
-            const Spacer(),
-            buildEmail(context),
-            const Spacer(),
-            buildPassword(context, viewModel),
-            const Spacer(),
-            buildForgotPassword(context),
-            const Spacer(),
-            buildLoginButton(),
-            const Spacer(),
-            buildDivider(context),
-            const Spacer(),
-            buildSocialLoginButton(),
-            const Spacer(
-              flex: 5,
-            ),
-            buildRegisterButton(context, viewModel)
-          ],
-        ),
-      ),
-    );
-  }
-
-  Align buildRegisterButton(BuildContext context, AuthViewModel viewModel) {
-    return Align(
-      alignment: Alignment.center,
-      child: InkWell(
-        onTap: () {
-          viewModel.changePage(1);
-        },
-        child: Padding(
-          padding: context.verticalPadding(value: 4),
-          child: RichText(
-            text: TextSpan(
-              children: [
-                TextSpan(text: LocaleKeys.not_a_member.locale + " "),
-                TextSpan(
-                  text: LocaleKeys.register_now.locale,
-                  style: TextStyle(color: context.themeColorScheme.onPrimary),
-                ),
-              ],
-              style: context.textTheme.bodySmall!
-                  .copyWith(color: context.themeColorScheme.primary),
-            ),
+        child: Form(
+          key: viewModel.loginKey,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              buildChangeLogo(context),
+              const Spacer(),
+              buildEmail(viewModel),
+              const Spacer(),
+              buildPassword(viewModel),
+              const Spacer(),
+              buildForgotPassword(context),
+              const Spacer(),
+              LoginButton(
+                text: LocaleKeys.sign_in,
+                onPressed: () {
+                  viewModel.loginKey.currentState!.validate();
+                },
+              ),
+              const Spacer(),
+              buildDivider(context),
+              const Spacer(),
+              buildSocialLoginButton(),
+              const Spacer(
+                flex: 5,
+              ),
+              RegisterLoginWidget(
+                context: context,
+                onPressed: () {
+                  viewModel.changePage(1);
+                },
+                text1: LocaleKeys.not_a_member,
+                text2: LocaleKeys.register_now,
+              ),
+            ],
           ),
         ),
       ),
@@ -211,68 +304,10 @@ class _AuthViewState extends BaseState<AuthView> {
     );
   }
 
-  LoginButton buildLoginButton() {
-    return LoginButton(
-      text: LocaleKeys.sign_in.locale,
-      onPressed: () {},
-    );
-  }
-
   Text buildForgotPassword(BuildContext context) {
     return Text(
       LocaleKeys.forgot_password.locale,
-      style:
-          context.textTheme.bodyMedium!.copyWith(fontWeight: FontWeight.w500),
-    );
-  }
-
-  Column buildPassword(BuildContext context, AuthViewModel viewModel) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          LocaleKeys.password.locale,
-          style: context.textTheme.bodyMedium!
-              .copyWith(color: context.themeColorScheme.primary),
-        ),
-        context.sizedBox(value: 4),
-        Observer(builder: (_) {
-          return TextFormField(
-            style: context.textTheme.bodyMedium,
-            obscureText: viewModel.isVisible,
-            decoration: InputDecoration(
-              suffixIcon: IconButton(
-                splashColor: Colors.transparent,
-                hoverColor: Colors.transparent,
-                highlightColor: Colors.transparent,
-                onPressed: () {
-                  viewModel.changeVisible();
-                },
-                icon: viewModel.isVisible
-                    ? const Icon(Icons.visibility_off)
-                    : const Icon(Icons.visibility),
-              ),
-            ),
-          );
-        }),
-      ],
-    );
-  }
-
-  Column buildEmail(BuildContext context, {AuthViewModel? viewModel}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          LocaleKeys.e_mail.locale,
-          style: context.textTheme.bodyMedium!
-              .copyWith(color: context.themeColorScheme.primary),
-        ),
-        context.sizedBox(value: 4),
-        TextFormField(
-          style: context.textTheme.bodyMedium,
-        ),
-      ],
+      style: context.textTheme.bodyMedium,
     );
   }
 
