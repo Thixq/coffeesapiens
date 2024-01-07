@@ -140,6 +140,7 @@ class _AuthViewState extends BaseState<AuthView> {
       validator: (p1) {
         if (p1!.isEmpty) return LocaleKeys.auth_isfilled.locale;
         if (p1.length < 15) return LocaleKeys.auth_phone_validate.locale;
+        return null;
       },
       inputFormatters: [
         FilteringTextInputFormatter.digitsOnly,
@@ -160,6 +161,7 @@ class _AuthViewState extends BaseState<AuthView> {
           if (p1!.isEmpty) return LocaleKeys.auth_isfilled.locale;
           if (p1.length < 8)
             return LocaleKeys.auth_password_powerful_validate.locale;
+          return null;
         },
         textTextFormFiled: LocaleKeys.password.locale,
         textInputType: TextInputType.visiblePassword,
@@ -179,6 +181,7 @@ class _AuthViewState extends BaseState<AuthView> {
         if (!FormValidate.instance.EmailValidate(p1)) {
           return LocaleKeys.auth_email_validate.locale;
         }
+        return null;
       },
       textTextFormFiled: LocaleKeys.e_mail.locale,
       textInputType: TextInputType.emailAddress,
